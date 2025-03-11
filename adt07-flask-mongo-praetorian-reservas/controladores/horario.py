@@ -55,7 +55,6 @@ def update_horarios(horario_id):
 @flask_praetorian.auth_required
 def delete_horarios(horario_id):
     try: 
-        data = request.get_json()
         res = Horarios.objects(_id=horario_id).delete()
     except Exception as e:
         return jsonify('{"error": "Imposible actualizar el objeto"}'), 400
