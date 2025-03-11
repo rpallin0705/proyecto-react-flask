@@ -69,12 +69,12 @@ const HorariosList = () => {
                             <td>{horario.hora_fin}</td>
                             <td>{horario.instalacion?.nombre || "Sin instalación"}</td>
                             <td>
-                                <Button as={Link} to={`/horario/edit/${horario._id}`} className="btn-success">
+                                <Button as={Link} to={`/horarios/edit/${horario._id}`} className="btn-success">
                                     Editar
                                 </Button>
                             </td>                            
                             <td>
-                                <Button as={Link} to={`/horario/del/${horario._id}`} className="btn-danger">
+                                <Button as={Link} to={`/horarios/del/${horario._id}`} className="btn-danger">
                                     Eliminar
                                 </Button>
                             </td>

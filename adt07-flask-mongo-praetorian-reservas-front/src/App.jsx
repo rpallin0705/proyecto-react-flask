@@ -47,7 +47,7 @@ const router = createBrowserRouter([
         element: <HorariosList />,
       },
       {
-        path: "horario/del/:_id",
+        path: "horarios/del/:_id",
         element: <HorarioDeletePage />,
       },
       {
