@@ -208,4 +208,8 @@ db.horarios.updateMany(
     {}, 
     { $unset: {         
         'instalacion.id':1
-    }});
+    }}
+);
+
+// Eliminamos la id para que no de errores en futuras consultas
+db.horarios.updateMany({}, { $unset: { id: 1 } })
