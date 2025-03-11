@@ -8,8 +8,9 @@ import InstalacionesPage from "./pages/InstalacionesPage";
 import InstalacionDeletePage from "./pages/InstalacionDeletePage";
 import InstalacionFormPage from "./pages/InstalacionFormPage";
 import ReservasPage from "./pages/ReservasPage";
-
 import 'bootstrap/dist/css/bootstrap.min.css';
+import HorariosList from "./components/HorariosList";
+import HorarioDeletePage from "./pages/HorarioDeletePage";
 
 
 const router = createBrowserRouter([
@@ -40,6 +41,14 @@ const router = createBrowserRouter([
       {
         path: "instalacion/del/:_id",
         element: <InstalacionDeletePage />,
+      },
+      {
+        path: "horarios",
+        element: <HorariosList />,
+      },
+      {
+        path: "horario/del/:_id",
+        element: <HorarioDeletePage />,
       },
       {
         path: "mis-reservas",

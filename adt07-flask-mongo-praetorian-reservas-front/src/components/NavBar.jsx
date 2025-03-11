@@ -55,6 +55,7 @@ function NavBar() {
             {tipoUsuario == 'ADMIN' ? (
                   <>
                     <Nav.Link as={Link} to="/instalaciones">Instalaciones</Nav.Link>
+                    <Nav.Link as={Link} to="/horarios">Horarios</Nav.Link>
                   </>
             ): (<></>)}
             {isLogged ? (
