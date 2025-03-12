@@ -10,6 +10,7 @@ from modelos.Usuarios import Usuarios
 
 from controladores.instalacion import InstalacionBP
 from controladores.horario import HorarioBP
+from controladores.reserva import ReservaBP
 
 app = Flask(__name__)
 
@@ -107,6 +108,7 @@ def usuario():
 
 app.register_blueprint(InstalacionBP)
 app.register_blueprint(HorarioBP)
+app.register_blueprint(ReservaBP)
 
 # Run the APP
 if __name__ == "__main__":
