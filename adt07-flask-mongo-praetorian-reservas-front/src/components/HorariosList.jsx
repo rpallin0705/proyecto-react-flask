@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
-import { Button, Container, Table } from "react-bootstrap";
+import { Button, Container, Table, Form } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
 
 const HorariosList = () => {
     const [horarios, setHorarios] = useState([]);
+    const [horariosFiltrados, setHorariosFiltrados] = useState([]);
+    const [instalaciones, setInstalaciones] = useState([]);
+    const [instalacionSeleccionada, setInstalacionSeleccionada] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
     const navigate = useNavigate();
@@ -13,7 +16,6 @@ const HorariosList = () => {
         const fetchHorarios = async () => {
             try {
                 const response = await api.get('/horario');
-
                 const corregidoOid = response.data.map(item => ({
                     ...item,
                     _id: item._id.$oid,
@@ -26,6 +28,7 @@ const HorariosList = () => {
                 }));
 
                 setHorarios(corregidoOid);
+                setHorariosFiltrados(corregidoOid);
             } catch (err) {
                 console.error("Error al obtener horarios:", err);
                 navigate('/login');
@@ -34,12 +37,34 @@ const HorariosList = () => {
         fetchHorarios();
     }, []);
 
+    useEffect(() => {
+        const fetchInstalaciones = async () => {
+            try {
+                const response = await api.get('/instalacion');
+                setInstalaciones(response.data);
+            } catch (err) {
+                console.error("Error al obtener instalaciones:", err);
+            }
+        };
+        fetchInstalaciones();
+    }, []);
+
+    useEffect(() => {
+        if (instalacionSeleccionada === "") {
+            setHorariosFiltrados(horarios);
+        } else {
+            const filtrados = horarios.filter(h => h.instalacion._id === instalacionSeleccionada);
+            setHorariosFiltrados(filtrados);
+        }
+        setCurrentPage(1);
+    }, [instalacionSeleccionada, horarios]);
+
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = horarios.slice(indexOfFirstItem, indexOfLastItem);
+    const currentItems = horariosFiltrados.slice(indexOfFirstItem, indexOfLastItem);
 
     const nextPage = () => {
-        if (currentPage < Math.ceil(horarios.length / itemsPerPage)) {
+        if (currentPage < Math.ceil(horariosFiltrados.length / itemsPerPage)) {
             setCurrentPage(currentPage + 1);
         }
     };
@@ -52,6 +77,23 @@ const HorariosList = () => {
 
     return (
         <Container>
+            <h2>Horarios</h2>
+
+            <Form.Group className="mb-3">
+                <Form.Label>Filtrar por Instalación:</Form.Label>
+                <Form.Select 
+                    value={instalacionSeleccionada}
+                    onChange={(e) => setInstalacionSeleccionada(e.target.value)}
+                >
+                    <option value="">Todas las Instalaciones</option>
+                    {instalaciones.map(inst => (
+                        <option key={inst._id.$oid || inst._id} value={inst._id.$oid || inst._id}>
+                            {inst.nombre}
+                        </option>
+                    ))}
+                </Form.Select>
+            </Form.Group>
+
             <Table striped bordered hover>
                 <thead>
                     <tr>
@@ -81,8 +123,8 @@ const HorariosList = () => {
 
             <div className="d-flex justify-content-center mt-3">
                 <Button onClick={prevPage} disabled={currentPage === 1}>Anterior</Button>
-                <span className="mx-3">Página {currentPage} de {Math.ceil(horarios.length / itemsPerPage)}</span>
-                <Button onClick={nextPage} disabled={currentPage === Math.ceil(horarios.length / itemsPerPage)}>Siguiente</Button>
+                <span className="mx-3">Página {currentPage} de {Math.ceil(horariosFiltrados.length / itemsPerPage)}</span>
+                <Button onClick={nextPage} disabled={currentPage === Math.ceil(horariosFiltrados.length / itemsPerPage)}>Siguiente</Button>
             </div>
         </Container>
     );

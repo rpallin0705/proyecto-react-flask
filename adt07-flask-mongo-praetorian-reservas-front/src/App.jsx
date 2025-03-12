@@ -13,6 +13,7 @@ import HorariosList from "./components/HorariosList";
 import HorarioDeletePage from "./pages/HorarioDeletePage";
 import ReservasFormPage from "./pages/ReservaFormPage";
 import ReservaDeletePage from "./pages/ReservaDeletePage";
+import RegisterPage from "./pages/Register";
 
 
 const router = createBrowserRouter([
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
       {
         path: "login",
         element: <LoginPage />,
+      },
+      {
+        path: "register",
+        element: <RegisterPage />,
       },
       {
         path: "instalaciones",

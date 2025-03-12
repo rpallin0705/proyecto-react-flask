@@ -1,4 +1,4 @@
-from mongoengine import Document, EmbeddedDocument, StringField, BooleanField, ObjectIdField
+from mongoengine import Document, StringField, BooleanField, ObjectIdField
 import bson
 
 class Usuarios(Document):
@@ -55,12 +55,3 @@ class Usuarios(Document):
     @property
     def password(self):
         return self.hashed_password
-
-
-class UsuarioEmbedded(EmbeddedDocument):
-    _id = ObjectIdField()
-    username = StringField(required=True, unique=True)
-    hashed_password = StringField()
-    email = StringField(required=True, unique=True)
-    roles = StringField(default="user")  
-    is_active = BooleanField(default=True)
