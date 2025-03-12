@@ -11,6 +11,8 @@ import ReservasPage from "./pages/ReservasPage";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import HorariosList from "./components/HorariosList";
 import HorarioDeletePage from "./pages/HorarioDeletePage";
+import ReservasFormPage from "./pages/ReservaFormPage";
+import ReservaDeletePage from "./pages/ReservaDeletePage";
 
 
 const router = createBrowserRouter([
@@ -19,7 +21,7 @@ const router = createBrowserRouter([
     element: <RootLayout />,
     children: [
       {
-        index: true, // Esto indica que es la ruta por defecto para "/"
+        index: true,
         element: <HomePage />,
       },
       {
@@ -54,6 +56,18 @@ const router = createBrowserRouter([
         path: "mis-reservas",
         element: <ReservasPage />,
       },
+      {
+        path: "mis-reservas/add",
+        element: <ReservasFormPage />,
+      },
+      {
+        path: "mis-reservas/edit/:_id",
+        element: <ReservasFormPage />,
+      },
+      {
+        path: "mis-reservas/del/:_id",
+        element: <ReservaDeletePage />,
+      }
     ],
   },
 ]);

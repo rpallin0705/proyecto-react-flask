@@ -3,17 +3,14 @@ import { Button, Form } from "react-bootstrap";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import api from "../services/api";
 
-const ReservaForm = () => {
+const MisReservasForm = () => {
     let { _id } = useParams();
 
     const [fecha, setFecha] = useState('');
-    const [hora_inicio, setHoraInicio] = useState('');
-    const [hora_fin, setHoraFin] = useState('');
     const [instalacion, setInstalacion] = useState('');
-    const [usuario, setUsuario] = useState('');
-
+    const [horario, setHorario] = useState('');
+    const [horarios, setHorarios] = useState([]);
     const [instalaciones, setInstalaciones] = useState([]);
-    const [usuarios, setUsuarios] = useState([]);
     const [error, setError] = useState('');
 
     const navigate = useNavigate();
@@ -25,11 +22,68 @@ const ReservaForm = () => {
         if (ruta.pathname.includes('edit')) return 'edit';
     };
 
+    useEffect(() => {
+        const fetchInstalaciones = async () => {
+            try {
+                const response = await api.get('/instalacion');
+                setInstalaciones(response.data);
+            } catch (err) {
+                setError('Error cargando instalaciones');
+                console.log(err);
+            }
+        };
+        fetchInstalaciones();
+    }, []);
+
+    useEffect(() => {
+        if (instalacion) {
+            const fetchHorarios = async () => {
+                try {
+                    const response = await api.get('/horario');
+
+                    const horariosFiltrados = response.data.filter(h => {
+                        const idInstalacionHorario = h.instalacion._id.$oid || h.instalacion._id;
+                        return idInstalacionHorario === instalacion;
+                    });
+
+                    setHorarios(horariosFiltrados);
+                    console.log("Horarios cargados para la instalación:", horariosFiltrados);
+                } catch (err) {
+                    setError('Error cargando horarios');
+                    console.log(err);
+                }
+            };
+            fetchHorarios();
+        } else {
+            setHorarios([]);
+            setHorario('');
+        }
+    }, [instalacion]);
+
+    useEffect(() => {
+        if (estado() !== 'add') {
+            const fetchReserva = async () => {
+                try {
+                    const response = await api.get(`/reserva/${_id}`);
+                    const data = response.data;
+
+                    setFecha(new Date(data.fecha.$date).toISOString().split('T')[0]);
+                    setInstalacion(data.horario.instalacion._id.$oid || data.horario.instalacion._id);
+                    setHorario(data.horario._id.$oid || data.horario._id);
+                } catch (err) {
+                    setError('No se puede cargar la reserva');
+                    console.log(err);
+                }
+            };
+            fetchReserva();
+        }
+    }, [_id]);
+
     const manejaForm = async (event) => {
         event.preventDefault();
         try {
-            const reservaData = { fecha, hora_inicio, hora_fin, instalacion, usuario };
-
+            const reservaData = { fecha, horario };
+            console.log(reservaData)
             if (estado() === 'add') {
                 await api.post('/reserva', reservaData);
             } else {
@@ -59,44 +113,6 @@ const ReservaForm = () => {
         navigate(-1);
     };
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [instResponse, userResponse] = await Promise.all([
-                    api.get('/instalacion'),
-                    api.get('/usuario')
-                ]);
-                setInstalaciones(instResponse.data);
-                setUsuarios(userResponse.data);
-            } catch (err) {
-                setError('Error cargando instalaciones y usuarios');
-                console.log(err);
-            }
-        };
-        fetchData();
-    }, []);
-
-    useEffect(() => {
-        if (estado() !== 'add') {
-            const fetchReserva = async () => {
-                try {
-                    const response = await api.get(`/reserva/${_id}`);
-                    const data = response.data;
-
-                    setFecha(new Date(data.fecha.$date).toISOString().split('T')[0]); 
-                    setHoraInicio(data.horario.hora_inicio);
-                    setHoraFin(data.horario.hora_fin);
-                    setInstalacion(data.horario.instalacion._id);
-                    setUsuario(data.usuario._id);
-                } catch (err) {
-                    setError('No se puede cargar la reserva');
-                    console.log(err);
-                }
-            };
-            fetchReserva();
-        }
-    }, [_id]);
-
     return (
         <Form>
             <Form.Group className="mb-3">
@@ -111,26 +127,6 @@ const ReservaForm = () => {
                     value={fecha}
                     disabled={estado() === 'del'}
                     onChange={(e) => setFecha(e.target.value)}
-                />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-                <Form.Label>Hora Inicio:</Form.Label>
-                <Form.Control
-                    type="time"
-                    value={hora_inicio}
-                    disabled={estado() === 'del'}
-                    onChange={(e) => setHoraInicio(e.target.value)}
-                />
-            </Form.Group>
-
-            <Form.Group className="mb-3">
-                <Form.Label>Hora Fin:</Form.Label>
-                <Form.Control
-                    type="time"
-                    value={hora_fin}
-                    disabled={estado() === 'del'}
-                    onChange={(e) => setHoraFin(e.target.value)}
                 />
             </Form.Group>
 
@@ -151,16 +147,16 @@ const ReservaForm = () => {
             </Form.Group>
 
             <Form.Group className="mb-3">
-                <Form.Label>Usuario:</Form.Label>
+                <Form.Label>Horario:</Form.Label>
                 <Form.Select
-                    value={usuario}
-                    disabled={estado() === 'del'}
-                    onChange={(e) => setUsuario(e.target.value)}
+                    value={horario}
+                    disabled={estado() === 'del' || !instalacion}
+                    onChange={(e) => setHorario(e.target.value)}
                 >
-                    <option value="">Selecciona un usuario</option>
-                    {usuarios.map(user => (
-                        <option key={user._id.$oid || user._id} value={user._id.$oid || user._id}>
-                            {user.username}
+                    <option value="">Selecciona un horario</option>
+                    {horarios.map(h => (
+                        <option key={h._id.$oid || h._id} value={h._id.$oid || h._id}>
+                            {h.hora_inicio.slice(0, 5)} - {h.hora_fin.slice(0, 5)}
                         </option>
                     ))}
                 </Form.Select>
@@ -182,4 +178,4 @@ const ReservaForm = () => {
     );
 };
 
-export default ReservaForm;
+export default MisReservasForm;
