@@ -72,17 +72,11 @@ const HorarioForm = () => {
                 try {
                     const response = await api.get(`/horario/${_id}`);
                     const data = response.data;
-
-                    const convertirHora = (timestamp) => {
-                        const fecha = new Date(timestamp.$date);
-                        return fecha.toISOString().slice(11, 16);
-                    };
-
-                    setHoraInicio(convertirHora(data.hora_inicio));
-                    setHoraFin(convertirHora(data.hora_fin));
-
+    
+                    setHoraInicio(data.hora_inicio.slice(0, 5)); 
+                    setHoraFin(data.hora_fin.slice(0, 5));
+    
                     setInstalacion(data.instalacion._id?.$oid || data.instalacion._id);
-
                 } catch (err) {
                     setError('No se puede cargar el horario');
                     console.log(err);
@@ -91,7 +85,7 @@ const HorarioForm = () => {
             fetchHorario();
         }
     }, [_id]);
-
+    
     return (
         <Form>
             <Form.Group className="mb-3">

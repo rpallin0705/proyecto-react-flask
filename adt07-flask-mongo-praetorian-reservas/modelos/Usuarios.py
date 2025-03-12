@@ -1,4 +1,4 @@
-from mongoengine import Document, StringField, BooleanField, ObjectIdField
+from mongoengine import Document, EmbeddedDocument, StringField, BooleanField, ObjectIdField
 import bson
 
 class Usuarios(Document):
@@ -6,18 +6,11 @@ class Usuarios(Document):
     username = StringField(required=True, unique=True)
     hashed_password = StringField()
     email = StringField(required=True, unique=True)
-    # Praetorian usa esto para roles
     roles = StringField(default="user")  
     is_active = BooleanField(default=True)
 
     @property
     def identity(self):
-        """
-        *Required Attribute or Property*
-
-        flask-praetorian requires that the user class has an ``identity`` instance
-        attribute or property that provides the unique id of the user instance
-        """
         return str(self._id)
 
     @classmethod
@@ -30,16 +23,9 @@ class Usuarios(Document):
 
     def is_valid(self):
         return self.is_active
-    
+
     @property
     def rolenames(self):
-        """
-        *Required Attribute or Property*
-
-        flask-praetorian requires that the user class has a ``rolenames`` instance
-        attribute or property that provides a list of strings that describe the roles
-        attached to the user instance
-        """
         try:
             return self.roles.split(",")
         except Exception:
@@ -53,13 +39,6 @@ class Usuarios(Document):
     
     @classmethod
     def identify(cls, id):
-        """
-        *Required Method*
-
-        flask-praetorian requires that the user class implements an ``identify()``
-        class method that takes a single ``id`` argument and returns user instance if
-        there is one that matches or ``None`` if there is not.
-        """
         if cls.id_exists(id):
             return cls.get_by_id(id)
         return None
@@ -75,11 +54,13 @@ class Usuarios(Document):
     
     @property
     def password(self):
-        """
-        *Required Attribute or Property*
-
-        flask-praetorian requires that the user class has a ``password`` instance
-        attribute or property that provides the hashed password assigned to the user
-        instance
-        """
         return self.hashed_password
+
+
+class UsuarioEmbedded(EmbeddedDocument):
+    _id = ObjectIdField()
+    username = StringField(required=True, unique=True)
+    hashed_password = StringField()
+    email = StringField(required=True, unique=True)
+    roles = StringField(default="user")  
+    is_active = BooleanField(default=True)

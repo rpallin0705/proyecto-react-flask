@@ -1,9 +1,9 @@
-from mongoengine import Document, DateField, ReferenceField, ObjectIdField
-from modelos.Horarios import Horarios
-from modelos.Usuarios import Usuarios
+from mongoengine import Document, StringField, ObjectIdField, EmbeddedDocumentField
+from modelos.Horarios import HorarioEmbedded
+from modelos.Usuarios import UsuarioEmbedded
 
 class Reservas(Document):
-    _id = ObjectIdField() 
-    fecha = DateField(required=True)
-    horario = ReferenceField(Horarios, required=True, reverse_delete_rule=2)
-    usuario = ReferenceField(Usuarios, required=True, reverse_delete_rule=2)
+    _id = ObjectIdField()
+    fecha = StringField(required=True)
+    horario = EmbeddedDocumentField(HorarioEmbedded, required=True)
+    usuario = EmbeddedDocumentField(UsuarioEmbedded, required=True)

@@ -1,11 +1,9 @@
-from mongoengine import Document, StringField, BooleanField, ObjectIdField
-import bson
+from mongoengine import Document, EmbeddedDocument, StringField, ObjectIdField
 
 class Instalaciones(Document):
-    """
-    Objeto plantilla para mongoengine. Representa la localización de un item inventariable.
-    :param nombre: required string value    
-    """
+    _id = ObjectIdField() 
+    nombre = StringField(required=True, unique=True)
+
+class InstalacionEmbedded(EmbeddedDocument):
     _id = ObjectIdField()
-    # codigo = db.SequenceField()
-    nombre= StringField(required=True, unique=True)
+    nombre = StringField(required=True)

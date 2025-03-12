@@ -1,11 +1,14 @@
-from mongoengine import Document, ObjectIdField, DateTimeField, ReferenceField
-from modelos.Instalaciones import Instalaciones
-import bson
+from mongoengine import Document, EmbeddedDocument, StringField, ObjectIdField, EmbeddedDocumentField
+from modelos.Instalaciones import InstalacionEmbedded
+
+class HorarioEmbedded(EmbeddedDocument):
+    _id = ObjectIdField()
+    hora_inicio = StringField(required=True)
+    hora_fin = StringField(required=True)
+    instalacion = EmbeddedDocumentField(InstalacionEmbedded, required=True)
 
 class Horarios(Document):
-    
     _id = ObjectIdField()
-    # codigo = db.SequenceField()
-    hora_inicio= DateTimeField(required=True, unique=True)
-    hora_fin= DateTimeField(required=True, unique=True)
-    instalacion= ReferenceField(Instalaciones)
+    hora_inicio = StringField(required=True, unique=True)
+    hora_fin = StringField(required=True, unique=True)
+    instalacion = EmbeddedDocumentField(InstalacionEmbedded, required=True)

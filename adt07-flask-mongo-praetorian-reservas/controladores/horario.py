@@ -1,62 +1,40 @@
-# flask packages
-from flask import jsonify
-from flask import Blueprint
-from flask import request
+from flask import jsonify, Blueprint, request
 import flask_praetorian
 import bson
-
-
+from bson.objectid import ObjectId
 from modelos.Horarios import Horarios
 
 HorarioBP = Blueprint('horarios', __name__, url_prefix='/api/horario')
 
-# /api/horario
-
 @HorarioBP.route('', methods=['GET'])
 @flask_praetorian.auth_required
 def get_all_horarios():
-    try: 
+    try:
         output = Horarios.objects().to_json()
-        return (output)
-    except:
-        return jsonify('{"error": "Imposible procesar la petición"}'), 500
+        return output, 200
+    except Exception as e:
+        return jsonify({"error": f"Imposible procesar la petición: {str(e)}"}), 500
 
-@HorarioBP.route('<horario_id>', methods=['GET'])
+@HorarioBP.route('/<horario_id>', methods=['GET'])
 @flask_praetorian.auth_required
 def get_one_horario(horario_id):
-    try: 
-        output = Horarios.objects(_id=horario_id)[0].to_json()
-        return (output)
-    except:
-        return jsonify('{"error": "Imposible procesar la petición"}'), 404
-
-
-@HorarioBP.route('', methods=['POST'])
-@flask_praetorian.auth_required
-def save_horarios():
-    try: 
-        data = request.get_json()
-        res = Horarios(**data).save()
+    try:
+        horario = Horarios.objects.get(_id=ObjectId(horario_id))
+        return horario.to_json(), 200
+    except bson.errors.InvalidId:
+        return jsonify({"error": "ID inválido"}), 400
+    except Horarios.DoesNotExist:
+        return jsonify({"error": "Horario no encontrado"}), 404
     except Exception as e:
-        return jsonify('{"error": "Imposible crear el objeto"}'), 400
-    return jsonify(res), 201
+        return jsonify({"error": f"Imposible procesar la petición: {str(e)}"}), 500
 
-@HorarioBP.route('<horario_id>', methods=['PUT'])
-@flask_praetorian.auth_required
-def update_horarios(horario_id):
-    try: 
-        data = request.get_json()
-        res = Horarios.objects(_id=horario_id).update()
-    except Exception as e:
-        return jsonify('{"error": "Imposible actualizar el objeto"}'), 400
-    return jsonify(res), 201
-
-@HorarioBP.route('<horario_id>', methods=['DELETE'])
+@HorarioBP.route('/<horario_id>', methods=['DELETE'])
 @flask_praetorian.auth_required
 def delete_horarios(horario_id):
-    try: 
-        res = Horarios.objects(_id=horario_id).delete()
+    try:
+        res = Horarios.objects(_id=ObjectId(horario_id)).delete()
+        return jsonify({"message": "Horario eliminado"}), 200
+    except bson.errors.InvalidId:
+        return jsonify({"error": "ID inválido"}), 400
     except Exception as e:
-        return jsonify('{"error": "Imposible actualizar el objeto"}'), 400
-    return jsonify(res), 201
-
+        return jsonify({"error": f"Imposible eliminar el objeto: {str(e)}"}), 400

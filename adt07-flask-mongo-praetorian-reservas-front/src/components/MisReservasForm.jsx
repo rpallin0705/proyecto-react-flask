@@ -5,7 +5,8 @@ import api from "../services/api";
 
 const MisReservasForm = () => {
     let { _id } = useParams();
-
+    
+    // Estados del formulario
     const [fecha, setFecha] = useState('');
     const [instalacion, setInstalacion] = useState('');
     const [horario, setHorario] = useState('');
@@ -29,7 +30,7 @@ const MisReservasForm = () => {
                 setInstalaciones(response.data);
             } catch (err) {
                 setError('Error cargando instalaciones');
-                console.log(err);
+                console.error(err);
             }
         };
         fetchInstalaciones();
@@ -40,17 +41,14 @@ const MisReservasForm = () => {
             const fetchHorarios = async () => {
                 try {
                     const response = await api.get('/horario');
-
                     const horariosFiltrados = response.data.filter(h => {
                         const idInstalacionHorario = h.instalacion._id.$oid || h.instalacion._id;
                         return idInstalacionHorario === instalacion;
                     });
-
                     setHorarios(horariosFiltrados);
-                    console.log("Horarios cargados para la instalación:", horariosFiltrados);
                 } catch (err) {
                     setError('Error cargando horarios');
-                    console.log(err);
+                    console.error(err);
                 }
             };
             fetchHorarios();
@@ -72,7 +70,7 @@ const MisReservasForm = () => {
                     setHorario(data.horario._id.$oid || data.horario._id);
                 } catch (err) {
                     setError('No se puede cargar la reserva');
-                    console.log(err);
+                    console.error(err);
                 }
             };
             fetchReserva();
@@ -83,7 +81,7 @@ const MisReservasForm = () => {
         event.preventDefault();
         try {
             const reservaData = { fecha, horario };
-            console.log(reservaData)
+
             if (estado() === 'add') {
                 await api.post('/reserva', reservaData);
             } else {
@@ -93,7 +91,7 @@ const MisReservasForm = () => {
             navigate('/reservas');
         } catch (err) {
             setError('No se puede completar la petición');
-            console.log(err);
+            console.error(err);
         }
     };
 
@@ -104,7 +102,7 @@ const MisReservasForm = () => {
             navigate('/reservas');
         } catch (err) {
             setError('No se puede completar la petición');
-            console.log(err);
+            console.error(err);
         }
     };
 

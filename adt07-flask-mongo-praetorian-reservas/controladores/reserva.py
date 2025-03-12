@@ -1,87 +1,101 @@
-from flask import jsonify, Blueprint, request
+from flask import Blueprint, request
 import flask_praetorian
 from bson import ObjectId
 from modelos.Reservas import Reservas
 from modelos.Horarios import Horarios
-from modelos.Usuarios import Usuarios
+from modelos.Usuarios import Usuarios, UsuarioEmbedded
 
 ReservaBP = Blueprint('reservas', __name__, url_prefix='/api/reserva')
 
 @ReservaBP.route('', methods=['GET'])
 @flask_praetorian.auth_required
 def get_all_reservas():
-    try: 
-        output = Reservas.objects().to_json()
-        return output, 200
-    except:
-        return jsonify({"error": "Imposible procesar la petición"}), 500
+    try:
+        reservas = Reservas.objects()
+        for reserva in reservas:
+            if reserva.usuario:
+                reserva.usuario.hashed_password = None 
+        
+        return reservas.to_json(), 200
+
+    except Exception as e:
+        return {"error": f"Imposible procesar la petición: {str(e)}"}, 500
 
 @ReservaBP.route('<reserva_id>', methods=['GET'])
 @flask_praetorian.auth_required
 def get_one_reserva(reserva_id):
-    try: 
-        reserva = Reservas.objects(_id=reserva_id).first()  
-        if reserva:
-            return (reserva.to_json()), 200 
-        return jsonify({"error": "Reserva no encontrada"}), 404
-    except:
-        return jsonify({"error": "Imposible procesar la petición"}), 500
+    try:
+        reserva = Reservas.objects(_id=ObjectId(reserva_id)).first()
+        if not reserva:
+            return {"error": "Reserva no encontrada"}, 404
 
+        if reserva.usuario:
+            reserva.usuario.hashed_password = None
+
+        return reserva.to_json(), 200
+
+    except Exception as e:
+        return {"error": f"Imposible procesar la petición: {str(e)}"}, 500
 
 @ReservaBP.route('', methods=['POST'])
 @flask_praetorian.auth_required
 def save_reserva():
-    try: 
+    try:
         data = request.get_json()
-        usuario = Usuarios.objects(_id=ObjectId(data["usuario"])).first()
-        horario = Horarios.objects(_id=ObjectId(data["horario"])).first()
 
-        if not usuario or not horario:
-            return jsonify({"error": "Usuario u Horario no válido"}), 400
+        current_user = flask_praetorian.current_user()
+        usuario = UsuarioEmbedded(
+            _id=current_user._id,
+            username=current_user.username,
+            email=current_user.email,
+            roles=current_user.roles,
+            is_active=current_user.is_active
+        )
+
+        horario = Horarios.objects(_id=ObjectId(data["horario"])).first()
+        if not horario:
+            return {"error": "Horario no encontrado"}, 400
 
         reserva = Reservas(
             fecha=data["fecha"],
-            usuario=usuario,
-            horario=horario
+            horario=horario,
+            usuario=usuario
         ).save()
-        return jsonify(reserva.to_mongo()), 201
+
+        return reserva.to_mongo(), 201
     except Exception as e:
-        return jsonify({"error": str(e)}), 400
+        return {"error": str(e)}, 400
 
 @ReservaBP.route('<reserva_id>', methods=['PUT'])
 @flask_praetorian.auth_required
 def update_reserva(reserva_id):
-    try: 
+    try:
         data = request.get_json()
         update_data = {}
 
         if "fecha" in data:
             update_data["set__fecha"] = data["fecha"]
-        
-        if "usuario" in data:
-            usuario = Usuarios.objects(_id=ObjectId(data["usuario"])).first()
-            if usuario:
-                update_data["set__usuario"] = usuario
-            else:
-                return jsonify({"error": "Usuario no válido"}), 400
 
         if "horario" in data:
             horario = Horarios.objects(_id=ObjectId(data["horario"])).first()
             if horario:
                 update_data["set__horario"] = horario
             else:
-                return jsonify({"error": "Horario no válido"}), 400
+                return {"error": "Horario no válido"}, 400
 
         res = Reservas.objects(_id=ObjectId(reserva_id)).update(**update_data)
-        return jsonify({"message": "Reserva actualizada"}), 200 if res else jsonify({"error": "Reserva no encontrada"}), 404
+        return {"message": "Reserva actualizada"}, 200 if res else {"error": "Reserva no encontrada"}, 404
+
     except Exception as e:
-        return jsonify({"error": str(e)}), 400
+        return {"error": str(e)}, 400
+
 
 @ReservaBP.route('<reserva_id>', methods=['DELETE'])
 @flask_praetorian.auth_required
 def delete_reserva(reserva_id):
-    try: 
+    try:
         res = Reservas.objects(_id=ObjectId(reserva_id)).delete()
+        return {"message": "Reserva eliminada"}, 200 if res else {"error": "Reserva no encontrada"}, 404
+
     except Exception as e:
-        return jsonify('{"error": "Imposible actualizar el objeto"}'), 400
-    return jsonify(res), 201
+        return {"error": f"Imposible eliminar la reserva: {str(e)}"}, 400
