@@ -36,6 +36,25 @@ const MisReservasForm = () => {
     }, []);
 
     useEffect(() => {
+        if (estado() !== 'add') {
+            const fetchReserva = async () => {
+                try {
+                    const response = await api.get(`/reserva/${_id}`);
+                    const data = response.data;
+
+                    setFecha(data.fecha);
+                    setInstalacion(data.horario.instalacion._id.$oid || data.horario.instalacion._id);
+                    setHorario(data.horario._id.$oid || data.horario._id);
+                } catch (err) {
+                    setError('No se puede cargar la reserva');
+                    console.error(err);
+                }
+            };
+            fetchReserva();
+        }
+    }, [_id]);
+
+    useEffect(() => {
         if (instalacion) {
             const fetchHorarios = async () => {
                 try {
@@ -55,37 +74,7 @@ const MisReservasForm = () => {
             setHorarios([]);
             setHorario('');
         }
-    }, [instalacion]);
-
-    useEffect(() => {
-        if (estado() !== 'add') {
-            const fetchReserva = async () => {
-                try {
-                    const response = await api.get(`/reserva/${_id}`);
-                    const data = response.data;
-
-                    setFecha(data.fecha);
-                    const instalacionId = data.horario.instalacion._id.$oid || data.horario.instalacion._id;
-                    const horarioId = data.horario._id.$oid || data.horario._id;
-
-                    setInstalacion(instalacionId);
-                    setHorario(horarioId);
-
-                    const responseHorarios = await api.get('/horario');
-                    const horariosFiltrados = responseHorarios.data.filter(h => {
-                        const idInstalacionHorario = h.instalacion._id.$oid || h.instalacion._id;
-                        return idInstalacionHorario === instalacionId;
-                    });
-                    setHorarios(horariosFiltrados);
-
-                } catch (err) {
-                    setError('No se puede cargar la reserva');
-                    console.error(err);
-                }
-            };
-            fetchReserva();
-        }
-    }, [_id]);
+    }, [instalacion]); 
 
     const manejaForm = async (event) => {
         event.preventDefault();
