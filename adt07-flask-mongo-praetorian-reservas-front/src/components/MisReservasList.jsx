@@ -8,46 +8,56 @@ const MisReservasList = () => {
     const navigate = useNavigate();
 
     useEffect(() => { 
-        const peticion = async () => {
+        const fetchReservas = async () => {
             try {
-                const response = await api.get('/mis-reservas');
-                setReservas(response.data);
+                const response = await api.get('/reserva');
+                const reservasFormateadas = response.data.map(reserva => ({
+                    _id: reserva._id.$oid || reserva._id,
+                    fecha: reserva.fecha,
+                    hora_inicio: reserva.horario.hora_inicio.slice(0, 5),
+                    hora_fin: reserva.horario.hora_fin.slice(0, 5), 
+                    instalacion: reserva.horario.instalacion.nombre 
+                }));
+                
+                setReservas(reservasFormateadas);
             } catch (err) {
-                // setError('No se puede completar la operación');
-                navigate('/login')
                 console.log(err);
+                navigate('/login');
             }
         };
-        peticion();
-    }, []); // <-- Agrega el arreglo de dependencias vacío
+        fetchReservas();
+    }, []);
 
     return (
         <Container>
-            <Table>
+            <h2>Mis Reservas</h2>
+            <Table striped bordered hover>
                 <thead>
                     <tr>
                         <th>ID</th>  
-                        <th>Instalacion</th> 
-                        <th>Hora reserva</th>
-                        <th>Fecha reserva</th>
+                        <th>Instalación</th> 
+                        <th>Hora Inicio</th>
+                        <th>Hora Fin</th>
+                        <th>Fecha</th>
                         <th>Editar</th>
                         <th>Borrar</th>
                     </tr>
                 </thead>
                 <tbody>
                     {reservas.map((reserva) => (
-                        <tr key={reserva.id}>
-                            <td>{reserva.id}</td>
-                            <td>{reserva.horario.instalacion.nombre}</td>
-                            <td>{reserva.horario.horaInicio}</td>
+                        <tr key={reserva._id}>
+                            <td>{reserva._id}</td>
+                            <td>{reserva.instalacion}</td>
+                            <td>{reserva.hora_inicio}</td>
+                            <td>{reserva.hora_fin}</td>
                             <td>{reserva.fecha}</td>
                             <td>
-                                <Button as={Link} to={`/mis-reservas/edit/${reserva.id}`} className="btn-success">
+                                <Button as={Link} to={`/mis-reservas/edit/${reserva._id}`} className="btn-success">
                                     Editar
                                 </Button>
                             </td>                            
                             <td>
-                                <Button as={Link} to={`/mis-reservas/del/${reserva.id}`} className="btn-danger">
+                                <Button as={Link} to={`/mis-reservas/del/${reserva._id}`} className="btn-danger">
                                     Eliminar
                                 </Button>
                             </td>
@@ -55,7 +65,6 @@ const MisReservasList = () => {
                     ))}
                 </tbody>
             </Table>
-            {/*error && <p style={{ color: 'red' }}>{error}</p>*/}
         </Container>
     );
 };

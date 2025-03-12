@@ -9,17 +9,19 @@ const HorariosList = () => {
     const itemsPerPage = 10;
     const navigate = useNavigate();
 
-    useEffect(() => { 
+    useEffect(() => {
         const fetchHorarios = async () => {
             try {
                 const response = await api.get('/horario');
-                
+
                 const corregidoOid = response.data.map(item => ({
                     ...item,
-                    _id: item._id.$oid,  
+                    _id: item._id.$oid,
+                    hora_inicio: item.hora_inicio.slice(0, 5), 
+                    hora_fin: item.hora_fin.slice(0, 5), 
                     instalacion: {
                         ...item.instalacion,
-                        _id: item.instalacion._id?.$oid || item.instalacion._id 
+                        _id: item.instalacion._id?.$oid || item.instalacion._id
                     }
                 }));
 
@@ -41,7 +43,7 @@ const HorariosList = () => {
             setCurrentPage(currentPage + 1);
         }
     };
-    
+
     const prevPage = () => {
         if (currentPage > 1) {
             setCurrentPage(currentPage - 1);
@@ -53,9 +55,9 @@ const HorariosList = () => {
             <Table striped bordered hover>
                 <thead>
                     <tr>
-                        <th>ID</th>  
-                        <th>Hora Inicio</th> 
-                        <th>Hora Fin</th> 
+                        <th>ID</th>
+                        <th>Hora Inicio</th>
+                        <th>Hora Fin</th>
                         <th>Instalación</th>
                         <th>Editar</th>
                         <th>Borrar</th>
@@ -72,7 +74,7 @@ const HorariosList = () => {
                                 <Button as={Link} to={`/horarios/edit/${horario._id}`} className="btn-success">
                                     Editar
                                 </Button>
-                            </td>                            
+                            </td>
                             <td>
                                 <Button as={Link} to={`/horarios/del/${horario._id}`} className="btn-danger">
                                     Eliminar
