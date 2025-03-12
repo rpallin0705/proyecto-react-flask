@@ -21,6 +21,21 @@ def get_user_reservas():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@ReservaBP.route('/<_id>', methods=['GET'])
+@flask_praetorian.auth_required
+def get_reserva_by_id(_id):
+    try:
+        current_user = flask_praetorian.current_user()
+
+        reserva = Reservas.objects(_id=ObjectId(_id), usuario=current_user._id).first()
+        if not reserva:
+            return jsonify({"error": "Reserva no encontrada o no tienes permiso para verla"}), 404
+
+        return reserva.to_json(), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Error al obtener reserva: {str(e)}"}), 500
+
 @ReservaBP.route('', methods=['POST'])
 @flask_praetorian.auth_required
 def save_reserva():
@@ -50,3 +65,20 @@ def save_reserva():
 
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+
+@ReservaBP.route('/<_id>', methods=['DELETE'])
+@flask_praetorian.auth_required
+def delete_reserva(_id):
+    try:
+        current_user = flask_praetorian.current_user()
+        
+        reserva = Reservas.objects(_id=ObjectId(_id), usuario=current_user._id).first()
+        if not reserva:
+            return jsonify({"error": "Reserva no encontrada o no tienes permiso para eliminarla"}), 404
+
+        reserva.delete()
+
+        return jsonify({"message": "Reserva eliminada correctamente"}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"Error al eliminar reserva: {str(e)}"}), 500

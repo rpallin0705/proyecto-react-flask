@@ -5,8 +5,7 @@ import api from "../services/api";
 
 const MisReservasForm = () => {
     let { _id } = useParams();
-    
-    // Estados del formulario
+
     const [fecha, setFecha] = useState('');
     const [instalacion, setInstalacion] = useState('');
     const [horario, setHorario] = useState('');
@@ -65,9 +64,20 @@ const MisReservasForm = () => {
                     const response = await api.get(`/reserva/${_id}`);
                     const data = response.data;
 
-                    setFecha(new Date(data.fecha.$date).toISOString().split('T')[0]);
-                    setInstalacion(data.horario.instalacion._id.$oid || data.horario.instalacion._id);
-                    setHorario(data.horario._id.$oid || data.horario._id);
+                    setFecha(data.fecha);
+                    const instalacionId = data.horario.instalacion._id.$oid || data.horario.instalacion._id;
+                    const horarioId = data.horario._id.$oid || data.horario._id;
+
+                    setInstalacion(instalacionId);
+                    setHorario(horarioId);
+
+                    const responseHorarios = await api.get('/horario');
+                    const horariosFiltrados = responseHorarios.data.filter(h => {
+                        const idInstalacionHorario = h.instalacion._id.$oid || h.instalacion._id;
+                        return idInstalacionHorario === instalacionId;
+                    });
+                    setHorarios(horariosFiltrados);
+
                 } catch (err) {
                     setError('No se puede cargar la reserva');
                     console.error(err);
@@ -99,7 +109,7 @@ const MisReservasForm = () => {
         event.preventDefault();
         try {
             await api.delete(`/reserva/${_id}`);
-            navigate('/reservas');
+            navigate('/mis-reservas');
         } catch (err) {
             setError('No se puede completar la petición');
             console.error(err);
