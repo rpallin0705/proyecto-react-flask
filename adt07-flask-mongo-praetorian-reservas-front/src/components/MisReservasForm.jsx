@@ -88,7 +88,7 @@ const MisReservasForm = () => {
                 await api.put(`/reserva/${_id}`, reservaData);
             }
 
-            navigate('/reservas');
+            navigate('/mis-reservas');
         } catch (err) {
             setError('No se puede completar la petición');
             console.error(err);

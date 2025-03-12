@@ -11,17 +11,18 @@ const MisReservasList = () => {
         const fetchReservas = async () => {
             try {
                 const response = await api.get('/reserva');
+
                 const reservasFormateadas = response.data.map(reserva => ({
-                    _id: reserva._id.$oid || reserva._id,
+                    id: reserva._id.$oid,
                     fecha: reserva.fecha,
                     hora_inicio: reserva.horario.hora_inicio.slice(0, 5),
-                    hora_fin: reserva.horario.hora_fin.slice(0, 5), 
-                    instalacion: reserva.horario.instalacion.nombre 
+                    hora_fin: reserva.horario.hora_fin.slice(0, 5),
+                    instalacion: reserva.horario.instalacion.nombre
                 }));
-                
+
                 setReservas(reservasFormateadas);
             } catch (err) {
-                console.log(err);
+                console.error("Error al obtener reservas:", err);
                 navigate('/login');
             }
         };
@@ -45,19 +46,19 @@ const MisReservasList = () => {
                 </thead>
                 <tbody>
                     {reservas.map((reserva) => (
-                        <tr key={reserva._id}>
-                            <td>{reserva._id}</td>
+                        <tr key={reserva.id}>
+                            <td>{reserva.id}</td>
                             <td>{reserva.instalacion}</td>
                             <td>{reserva.hora_inicio}</td>
                             <td>{reserva.hora_fin}</td>
                             <td>{reserva.fecha}</td>
                             <td>
-                                <Button as={Link} to={`/mis-reservas/edit/${reserva._id}`} className="btn-success">
+                                <Button as={Link} to={`/mis-reservas/edit/${reserva.id}`} className="btn-success">
                                     Editar
                                 </Button>
                             </td>                            
                             <td>
-                                <Button as={Link} to={`/mis-reservas/del/${reserva._id}`} className="btn-danger">
+                                <Button as={Link} to={`/mis-reservas/del/${reserva.id}`} className="btn-danger">
                                     Eliminar
                                 </Button>
                             </td>
