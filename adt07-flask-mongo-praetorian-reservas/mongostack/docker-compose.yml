@@ -22,3 +22,13 @@ services:
       ME_CONFIG_MONGODB_ADMINPASSWORD: ${ADMIN_PASSWORD}
       ME_CONFIG_MONGODB_URL: mongodb://${ADMIN_USERNAME}:${ADMIN_PASSWORD}@mongo:27017/
       ME_CONFIG_BASICAUTH: "false"
+
+  mongo-seed:
+    image: mongo
+    depends_on:
+      - mongo
+    volumes:
+      - ./mongo-init:/mongo-init
+    restart: "no"
+    command: >
+      sh -c "sleep 10 && mongo mongodb://${ADMIN_USERNAME}:${ADMIN_PASSWORD}@mongo:27017/deporte /mongo-init/post-init.js"

@@ -1,4 +1,4 @@
-use deporte;
+db = db.getSiblingDB('deporte');
 
 db.usuarios.insertMany([
 {"id": 2, "roles": "OPERARIO", "email": "pepe@gmail.com", "is_active": true, "hashed_password": "$2a$10$zlD33q.JAxrRPsUGYGY7tedH/dQUn2MmlxQzjO7Y.oqK6rOjJdueq", "username": "pepe"},
@@ -213,3 +213,27 @@ db.horarios.updateMany(
 
 // Eliminamos la id para que no de errores en futuras consultas
 db.horarios.updateMany({}, { $unset: { id: 1 } })
+
+/**
+ * Como he decidido quitar el usuario embedido de reservas y pasarlo a una referencia 
+ * hay que ejecutar este codigo para quitar el usuario embedido y pasarle su ObjectId
+ */
+
+db.reservas.find().forEach((reserva) => {
+    if (!reserva.usuario || !reserva.usuario.username) return; 
+
+    const username = reserva.usuario.username; 
+    db.reservas.updateOne({ _id: reserva._id }, { $unset: { usuario: "" } }); 
+
+    const usuario = db.usuarios.findOne({ username: username });
+
+    if (usuario) {
+        db.reservas.updateOne(
+            { _id: reserva._id },
+            { $set: { usuario: usuario._id } }
+        );
+    } else {
+        print(`Usuario ${username} no encontrado en la BD`);
+    }
+});
+
