@@ -31,7 +31,6 @@ const MisReservasList = () => {
 
     return (
         <Container>
-            <h2>Mis Reservas</h2>
             <Table striped bordered hover>
                 <thead>
                     <tr>

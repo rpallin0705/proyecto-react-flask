@@ -56,18 +56,19 @@ def save_reserva():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-@ReservaBP.route('/<_id>', methods=['DELETE'])
+from bson import ObjectId, errors
+
+@ReservaBP.route('/<reserva_id>', methods=['DELETE'])
 @flask_praetorian.auth_required
-def delete_reserva(_id):
+def delete_reserva(reserva_id):
     try:
-        current_user = flask_praetorian.current_user()
-        reserva = Reservas.objects(_id=ObjectId(_id), usuario=current_user._id).first()
-        if not reserva:
-            return jsonify({"error": "Reserva no encontrada o sin permisos"}), 404
-        reserva.delete()
+        res = Reservas.objects(_id=ObjectId(reserva_id)).delete()
         return jsonify({"message": "Reserva eliminada correctamente"}), 200
+    except errors.InvalidId:
+        return jsonify({"error": "ID inválido"}), 400
     except Exception as e:
         return jsonify({"error": f"Error al eliminar reserva: {str(e)}"}), 500
+
 
 @ReservaBP.route('/<_id>', methods=['PUT'])
 @flask_praetorian.auth_required
