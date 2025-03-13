@@ -74,3 +74,37 @@ db.reservas.find().forEach((reserva) => {
     }
 });
 ```
+
+# 📌 Documentación de Endpoints de la API
+
+## **Horarios (`/api/horario`)**
+| Método  | Endpoint                      | Descripción                          | Autenticación |
+|---------|--------------------------------|--------------------------------------|---------------|
+| `GET`   | `/api/horario`                 | Obtiene todos los horarios          | ✅ Requerida  |
+| `GET`   | `/api/horario/<horario_id>`    | Obtiene un horario por ID           | ✅ Requerida  |
+| `DELETE`| `/api/horario/<horario_id>`    | Elimina un horario por ID           | ✅ Requerida  |
+
+---
+
+## **Instalaciones (`/api/instalacion`)**
+| Método  | Endpoint                           | Descripción                           | Autenticación |
+|---------|------------------------------------|---------------------------------------|---------------|
+| `GET`   | `/api/instalacion`                 | Obtiene todas las instalaciones      | ✅ Requerida  |
+| `GET`   | `/api/instalacion/<instalacion_id>` | Obtiene una instalación por ID       | ✅ Requerida  |
+| `POST`  | `/api/instalacion`                 | Crea una nueva instalación           | ✅ Requerida  |
+| `PUT`   | `/api/instalacion/<instalacion_id>` | Actualiza una instalación por ID     | ✅ Requerida  |
+| `DELETE`| `/api/instalacion/<instalacion_id>` | Elimina una instalación por ID       | ✅ Requerida  |
+
+---
+
+## **Reservas (`/api/reserva`)**
+| Método  | Endpoint                     | Descripción                                        | Autenticación |
+|---------|------------------------------|--------------------------------------------------|---------------|
+| `GET`   | `/api/reserva`                | Obtiene todas las reservas del usuario autenticado | ✅ Requerida  |
+| `GET`   | `/api/reserva/<reserva_id>`   | Obtiene una reserva por ID (verifica permisos)   | ✅ Requerida  |
+| `POST`  | `/api/reserva`                | Crea una nueva reserva                           | ✅ Requerida  |
+| `PUT`   | `/api/reserva/<reserva_id>`   | Actualiza una reserva (solo fecha y horario)    | ✅ Requerida  |
+| `DELETE`| `/api/reserva/<reserva_id>`   | Elimina una reserva por su ID                   | ✅ Requerida  |
+
+---
+
